@@ -241,6 +241,18 @@ class TreeCtrlPanel(wx.Panel):
            self._TreePanel.Show()
            self._TreePanel.Layout()
            self.Layout()
+       elif message=="load_cfg":
+           self._TreePanel.ClickOnOpenConfigFile()
+           if self._TreePanel.IsShown()==False:
+               self._TreePanel.Show(True)
+               self._TreePanel.Show()
+               self._TreePanel.Layout()
+               self.Layout()
+       elif message=="save_cfg":
+           if self._TreePanel.IsShown():
+               self._TreePanel.ClickOnSaveConfigFile()
+           else:
+               logger.info("No Config dict to save")
            
       
 class MyApp(wx.App):
@@ -272,13 +284,7 @@ class MyFrame(wx.Frame):
       self.Splitter.SplitVertically(self._LbBtPanel,self._TreePanel)
       self.Splitter.SetSashGravity(0.5)
       
-      self._menubar=wx.MenuBar()
-      open_menu=wx.Menu()
-      load_item=wx.MenuItem(open_menu,id=1,text="load",kind=wx.ITEM_NORMAL)
-      open_menu.Append(load_item)
-      self._menubar.Append(open_menu, 'Menu')
-      self.SetMenuBar(self._menubar)
-      self.Bind(wx.EVT_MENU,self.menuhandler)
+      self.init_menu()
       
       #self._maxFiles=len(self.reader._file_list) 
       
@@ -298,6 +304,30 @@ class MyFrame(wx.Frame):
       self.Layout()
       
       self.Centre(wx.BOTH)
+      
+   def init_menu(self):
+      self._menubar=wx.MenuBar()
+      open_menu=wx.Menu()
+      
+      load_file_list=wx.MenuItem(open_menu,id=1,text="load File List",kind=wx.ITEM_NORMAL)
+      open_menu.Append(load_file_list)
+      
+      save_file_list=wx.MenuItem(open_menu,id=2,text="save As File List",kind=wx.ITEM_NORMAL)
+      open_menu.Append(save_file_list)
+      
+      load_config=wx.MenuItem(open_menu,id=3,text="load Config File",kind=wx.ITEM_NORMAL)
+      open_menu.Append(load_config)
+      
+      save_config=wx.MenuItem(open_menu,id=4,text="save As Config File",kind=wx.ITEM_NORMAL)
+      open_menu.Append(save_config)
+      
+      exit_item=wx.MenuItem(open_menu,id=5,text="exit",kind=wx.ITEM_NORMAL)
+      open_menu.Append(exit_item)
+      
+      self._menubar.Append(open_menu, 'Menu')
+      self.SetMenuBar(self._menubar)
+      self.Bind(wx.EVT_MENU,self.menuhandler)
+    
    @property
    def mListBox(self):
        return self._LbBtPanel.mListBox
@@ -312,6 +342,14 @@ class MyFrame(wx.Frame):
          file=self.OnOpen()
          if file:
             pub.sendMessage("listBoxListener",message="update",arg2=file)
+      elif id==2:
+          pass
+      elif id==3:
+          pub.sendMessage("tree_listener",message="load_cfg")
+      elif id==4:
+          pub.sendMessage("tree_listener",message="save_cfg")
+      elif id==5:
+          self.Close()
          
    def OnOpen(self, event=None):
        '''
