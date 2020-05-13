@@ -321,7 +321,10 @@ class MyFrame(wx.Frame):
       save_config=wx.MenuItem(open_menu,id=4,text="save As Config File",kind=wx.ITEM_NORMAL)
       open_menu.Append(save_config)
       
-      exit_item=wx.MenuItem(open_menu,id=5,text="exit",kind=wx.ITEM_NORMAL)
+      separator_item=wx.MenuItem(open_menu,id=5,text="separator",kind=wx.ITEM_NORMAL)
+      open_menu.Append(separator_item)
+      
+      exit_item=wx.MenuItem(open_menu,id=6,text="exit",kind=wx.ITEM_NORMAL)
       open_menu.Append(exit_item)
       
       self._menubar.Append(open_menu, 'Menu')
@@ -349,6 +352,9 @@ class MyFrame(wx.Frame):
       elif id==4:
           pub.sendMessage("tree_listener",message="save_cfg")
       elif id==5:
+          id=self._menubar.FindMenu("Menu")
+          self._menubar.GetMenu(id).AppendSeparator()
+      elif id==6:
           self.Close()
          
    def OnOpen(self, event=None):
