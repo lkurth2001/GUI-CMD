@@ -196,13 +196,13 @@ class LbBtPanel(wx.Panel):
    def OnMouseMove(self, event):
         # Event handler for mouse move event. Updates current position of cursor in data coordinates.
         
-        event.Skip()
         # get mouse position in window
         self.mousePos = self.ScreenToClient(wx.GetMousePosition())
         x, y = self.mousePos.Get()
         if self.mListBox.HitTest(x,y)!=wx.NOT_FOUND and self.reader.get_length()>1:
-         self.mListBox.SetToolTip(self.reader.get_files([self.mListBox.HitTest(x,y)-1]))
-   
+           self.mListBox.SetToolTip(self.reader.get_files(self.mListBox.HitTest(x,y)))
+        event.Skip()
+         
    def updateChoices(self,choices):
       if self.mListBox:
           self.mListBox.Clear()
