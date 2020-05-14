@@ -23,6 +23,7 @@ class ButtonPanel(wx.Panel):
    def __init__(self,parent):
       wx.Panel.__init__(self,parent,style=wx.BORDER_SUNKEN)
       self._wx_init()
+      self._init_pubsub()
       self._ApplyLayout()
       
    def _wx_init(self):
@@ -47,11 +48,14 @@ class ButtonPanel(wx.Panel):
       self.Fit()
       self.Layout()
       
+   def _init_pubsub(self):
+      pass
+      
 class LbBtPanel(wx.Panel):
    def __init__(self,parent,fname):
       wx.Panel.__init__(self,parent,style=wx.BORDER_SUNKEN)
-      pub.subscribe(self.my_listener,"listBoxListener")
       self._wx_init(fname)
+      self._init_pubsub()
       self._ApplyLayout()
       
    def _wx_init(self,fname):
@@ -89,6 +93,9 @@ class LbBtPanel(wx.Panel):
        self.Fit()
        self.Layout()
    
+   def _init_pubsub(self):
+      pub.subscribe(self.my_listener,"listBoxListener")
+   
    def my_listener(self,message,arg2=None):
        if message=="update":
             self.deleteAll()
@@ -100,7 +107,7 @@ class LbBtPanel(wx.Panel):
             self.mListBox.Bind(wx.EVT_MOTION,self.OnMouseMove)
             
    def GetSelectedFiles(self):
-       return [self.reader._file_list[i] for i in self.selectedItems]
+       self.reader.get_files(self.selectedItems)
    
    def ClickOnButton(self,event):
       obj=event.GetEventObject()
@@ -139,19 +146,18 @@ class LbBtPanel(wx.Panel):
             # actually select all the items in the list
             self.mListBox.Select(i)
             
-        if len(self.selectedItems)==len(self.reader._file_list):
+        if len(self.selectedItems)==self.reader.get_length():
             self.btPanel._bt_all.SetLabel("Deselect All")
         else:
             self.btPanel._bt_all.SetLabel("Select All")
         self.update_counter_text()
         
-        
    def selectAll(self):
-      for i in range(len(self.reader._file_list)):
+      for i in range(self.reader.get_length()):
          self.mListBox.SetSelection(i)
          self.selectedItems.append(i)
       self.btPanel._bt_all.SetLabel("Deselect All")
-      self.counter=len(self.reader._file_list)
+      self.counter=self.reader.get_length()
       self.update_counter_text()
    
    def deselectAll(self):
@@ -170,7 +176,7 @@ class LbBtPanel(wx.Panel):
          selection.sort(reverse=True)
          for i in selection:
             self.mListBox.Delete(i)
-            self.reader._file_list.pop(i)
+            self.reader.remove_file(i)
          self.deselectAll()
          
    def deleteAll(self):
@@ -180,7 +186,7 @@ class LbBtPanel(wx.Panel):
       self.mListBox.SetToolTip("")
          
    def update_counter_text(self):
-      self._maxFiles=len(self.reader._file_list)
+      self._maxFiles=self.reader.get_length()
       self.counter_text.SetLabel((str)(self.counter)+"/"+(str)(self._maxFiles))
    
    @property
@@ -194,8 +200,8 @@ class LbBtPanel(wx.Panel):
         # get mouse position in window
         self.mousePos = self.ScreenToClient(wx.GetMousePosition())
         x, y = self.mousePos.Get()
-        if self.mListBox.HitTest(x,y)!=wx.NOT_FOUND and len(self.reader._file_list)>1:
-         self.mListBox.SetToolTip(self.reader._file_list[self.mListBox.HitTest(x,y)-1])
+        if self.mListBox.HitTest(x,y)!=wx.NOT_FOUND and self.reader.get_length()>1:
+         self.mListBox.SetToolTip(self.reader.get_files([self.mListBox.HitTest(x,y)-1]))
    
    def updateChoices(self,choices):
       if self.mListBox:
@@ -217,8 +223,8 @@ class LbBtPanel(wx.Panel):
 class TreeCtrlPanel(wx.Panel):
     def __init__(self,parent):
       wx.Panel.__init__(self,parent)
-      pub.subscribe(self.my_listener,"tree_listener")
       self._wx_init()
+      self._init_pubsub()
       self._ApplyLayout()
       
     def _wx_init(self):
@@ -232,7 +238,10 @@ class TreeCtrlPanel(wx.Panel):
       self.SetSizer(myTreeSizer)
       self.Fit()
       self.Layout()
-      
+    
+    def _init_pubsub(self):
+       pub.subscribe(self.my_listener,"tree_listener")
+    
     def my_listener(self,message,arg2=None):
        if message=="apply" and arg2:
            #self._TreePanel=jumeg_gui_config.CtrlPanel(self.Splitter,fname="intext_config.yaml")
@@ -266,6 +275,7 @@ class MyFrame(wx.Frame):
    def __init__(self,parent,fname=None):
       wx.Frame.__init__(self,parent,id=wx.ID_ANY,title="JuMEG ListBox",pos=wx.DefaultPosition, size=wx.Size(500,400),style=wx.DEFAULT_FRAME_STYLE | wx.TAB_TRAVERSAL)
       self._wx_init(fname)
+      self._init_pubsub()
       self._ApplyLayout()
       
    def _wx_init(self,fname):
@@ -304,7 +314,10 @@ class MyFrame(wx.Frame):
       self.Layout()
       
       self.Centre(wx.BOTH)
-      
+   
+   def _init_pubsub(self):
+      pass
+   
    def init_menu(self):
       self._menubar=wx.MenuBar()
       open_menu=wx.Menu()
@@ -315,16 +328,17 @@ class MyFrame(wx.Frame):
       save_file_list=wx.MenuItem(open_menu,id=2,text="save As File List",kind=wx.ITEM_NORMAL)
       open_menu.Append(save_file_list)
       
+      open_menu.AppendSeparator()
+      
       load_config=wx.MenuItem(open_menu,id=3,text="load Config File",kind=wx.ITEM_NORMAL)
       open_menu.Append(load_config)
       
       save_config=wx.MenuItem(open_menu,id=4,text="save As Config File",kind=wx.ITEM_NORMAL)
       open_menu.Append(save_config)
       
-      separator_item=wx.MenuItem(open_menu,id=5,text="separator",kind=wx.ITEM_NORMAL)
-      open_menu.Append(separator_item)
+      open_menu.AppendSeparator()
       
-      exit_item=wx.MenuItem(open_menu,id=6,text="exit",kind=wx.ITEM_NORMAL)
+      exit_item=wx.MenuItem(open_menu,id=5,text="exit",kind=wx.ITEM_NORMAL)
       open_menu.Append(exit_item)
       
       self._menubar.Append(open_menu, 'Menu')
@@ -352,9 +366,6 @@ class MyFrame(wx.Frame):
       elif id==4:
           pub.sendMessage("tree_listener",message="save_cfg")
       elif id==5:
-          id=self._menubar.FindMenu("Menu")
-          self._menubar.GetMenu(id).AppendSeparator()
-      elif id==6:
           self.Close()
          
    def OnOpen(self, event=None):
