@@ -107,7 +107,7 @@ class LbBtPanel(wx.Panel):
             self.mListBox.Bind(wx.EVT_MOTION,self.OnMouseMove)
             
    def GetSelectedFiles(self):
-       self.reader.get_files(self.selectedItems)
+       return self.reader.get_files(self.selectedItems)
    
    def ClickOnButton(self,event):
       obj=event.GetEventObject()
@@ -116,10 +116,7 @@ class LbBtPanel(wx.Panel):
       elif obj.GetLabel()=="Deselect All":
          self.deselectAll()
       elif obj.GetName().endswith(".BT.PRINT"):
-         """for i in self.selectedItems:
-            print(self.reader._file_list[i])"""
-         #print(self.GetSelectedFiles())
-         logger.info("SELECTED FIles in ListBox: {} ".format(pprint.pformat( self.GetSelectedFiles(),indent=4) ) )
+         logger.info("SELECTED FIles in ListBox: {0} ".format(pprint.pformat(self.GetSelectedFiles(),indent=4) ) )
       elif obj.GetName().endswith(".BT.DEL"):
          self.deleteSelectedItems()
       elif obj.GetName().endswith("BT.CLEAR"):
@@ -244,8 +241,6 @@ class TreeCtrlPanel(wx.Panel):
     
     def my_listener(self,message,arg2=None):
        if message=="apply" and arg2:
-           #self._TreePanel=jumeg_gui_config.CtrlPanel(self.Splitter,fname="intext_config.yaml")
-           #os.system('python jumeg_gui_config.py &')
            self._TreePanel._init_cfg(config=arg2)
            self._TreePanel.Show()
            self._TreePanel.Layout()
