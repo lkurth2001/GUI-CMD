@@ -67,19 +67,18 @@ class LbBtPanel(wx.Panel):
       self.mListBox=None
       self.Bind(wx.EVT_BUTTON,self.ClickOnButton)
       self.Bind(wx.EVT_LISTBOX,self.select)
-      self.Bind(wx.EVT_MOTION,self.OnMouseMove)
       self.counter=0
       self.selectedItems=list()
       self.counter_text=wx.StaticText(self, wx.ID_ANY,(str)(self.counter)+"/0",wx.Point(-1,-1),wx.DefaultSize,0)
       if len(choices)>0:
           self.mListBox = wx.ListBox(self,wx.ID_ANY,choices=choices,style=wx.LB_MULTIPLE) 
           self.mListBox.SetFont(wx.Font(12,75,90,90,False,wx.EmptyString))
-          self.mListBox.SetToolTip("ListBox")
           self.btPanel=ButtonPanel(self)
       else:
           fname=self.frame.OnOpen()
           choices=self.reader.read_file(fname)
           self.updateChoices(choices)
+      self.mListBox.Bind(wx.EVT_MOTION,self.OnMouseMove)
       self.update_counter_text()
       
    def _ApplyLayout(self):
@@ -180,7 +179,6 @@ class LbBtPanel(wx.Panel):
       self.mListBox.Clear()
       self.counter=0
       self.counter_text.SetLabel((str)(self.counter)+"/0")
-      self.mListBox.SetToolTip("")
          
    def update_counter_text(self):
       self._maxFiles=self.reader.get_length()
@@ -194,11 +192,14 @@ class LbBtPanel(wx.Panel):
         # Event handler for mouse move event. Updates current position of cursor in data coordinates.
         
         # get mouse position in window
-        self.mousePos = self.ScreenToClient(wx.GetMousePosition())
-        x, y = self.mousePos.Get()
-        if self.mListBox.HitTest(x,y)!=wx.NOT_FOUND and self.reader.get_length()>1:
-           self.mListBox.SetToolTip(self.reader.get_files(self.mListBox.HitTest(x,y)))
-        event.Skip()
+        x=event.GetX()
+        y=event.GetY()
+        item=self.mListBox.HitTest((x,y))
+        if item == wx.NOT_FOUND:
+           v=""
+        else:
+           v=self.reader.get_files(item)
+        self.mListBox.SetToolTip(v)
          
    def updateChoices(self,choices):
       if self.mListBox:
@@ -209,7 +210,6 @@ class LbBtPanel(wx.Panel):
           myListBoxSizer.Add(self.counter_text,1,wx.ALIGN_CENTER_HORIZONTAL | wx.EXPAND | wx.ALL,5)
           self.mListBox = wx.ListBox(self,wx.ID_ANY,choices=choices,style=wx.LB_MULTIPLE) 
           self.mListBox.SetFont(wx.Font(12,75,90,90,False,wx.EmptyString))
-          self.mListBox.SetToolTip("ListBox")
           myListBoxSizer.Add(self.mListBox,1,wx.ALIGN_CENTER_HORIZONTAL | wx.EXPAND | wx.ALL,5)
           self.btPanel=ButtonPanel(self)
           myListBoxSizer.Add(self.btPanel,0,wx.ALIGN_CENTER_HORIZONTAL | wx.ALL | wx.EXPAND,5)
