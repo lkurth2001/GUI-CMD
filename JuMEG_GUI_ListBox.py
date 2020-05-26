@@ -15,6 +15,7 @@ import jumeg_base
 import jumeg_gui_wxlib_utils_controls
 import jumeg_gui_config
 from jumeg.base import jumeg_logger
+from gui_base_demo import _BASE
 logger = logging.getLogger('jumeg')
 logging.basicConfig(level=logging.DEBUG)
 
@@ -51,15 +52,16 @@ class ButtonPanel(wx.Panel):
    def _init_pubsub(self):
       pass
       
-class FileSelectionBox(wx.Panel):
-   def __init__(self,parent,fname):
+class FileSelectionBox(_BASE):
+   """def __init__(self,parent,fname):
       wx.Panel.__init__(self,parent,style=wx.BORDER_SUNKEN)
       self._wx_init(fname)
       self._ApplyLayout()
-      self._init_pubsub()
+      self._init_pubsub()"""
       
-   def _wx_init(self,fname):
+   def _wx_init(self,**kwargs):
       self.reader=FileList()
+      fname=kwargs.get("fname","")
       if os.path.exists(fname):
           choices = self.reader.read_file(fname)
       else:
@@ -71,7 +73,7 @@ class FileSelectionBox(wx.Panel):
       self.selectedItems=list()
       self.counter_text=wx.StaticText(self, wx.ID_ANY,(str)(self.counter)+"/0",wx.Point(-1,-1),wx.DefaultSize,0)
       #print(type(choices))
-      if len(choices)>0:
+      if choices:
           self.mListBox = wx.ListBox(self,wx.ID_ANY,choices=choices,style=wx.LB_MULTIPLE) 
           self.mListBox.SetFont(wx.Font(12,75,90,90,False,wx.EmptyString))
           self.btPanel=ButtonPanel(self)
@@ -281,7 +283,7 @@ class MyFrame(wx.Frame):
       
       self.Splitter=wx.SplitterWindow(self)
       
-      self._FileSelectionBox=FileSelectionBox(self.Splitter,fname)
+      self._FileSelectionBox=FileSelectionBox(self.Splitter,fname=fname)
       
       #self._FileSelectionBox.Bind(wx.EVT_BUTTON,self.ClickOnButton)
       
