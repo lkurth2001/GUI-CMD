@@ -7,7 +7,7 @@ Created on Tue Mar 10 11:57:02 2020
 
 import wx
 #import wx.xrc
-from file_reader import Txt_Reader
+from file_reader import FileList
 import os,logging,pprint
 from pubsub import pub
 import jumeg_base_config
@@ -23,8 +23,8 @@ class ButtonPanel(wx.Panel):
    def __init__(self,parent):
       wx.Panel.__init__(self,parent,style=wx.BORDER_SUNKEN)
       self._wx_init()
-      self._init_pubsub()
       self._ApplyLayout()
+      self._init_pubsub()
       
    def _wx_init(self):
       self._bt_all = wx.Button(self,label="Select All",name=self.GetName()+".BT.ALL")
@@ -55,11 +55,11 @@ class LbBtPanel(wx.Panel):
    def __init__(self,parent,fname):
       wx.Panel.__init__(self,parent,style=wx.BORDER_SUNKEN)
       self._wx_init(fname)
-      self._init_pubsub()
       self._ApplyLayout()
+      self._init_pubsub()
       
    def _wx_init(self,fname):
-      self.reader=Txt_Reader()
+      self.reader=FileList()
       if os.path.exists(fname):
           choices = self.reader.read_file(fname)
       else:
@@ -142,18 +142,18 @@ class LbBtPanel(wx.Panel):
             # actually select all the items in the list
             self.mListBox.Select(i)
             
-        if len(self.selectedItems)==self.reader.get_length():
+        if len(self.selectedItems)==self.reader.counts:
             self.btPanel._bt_all.SetLabel("Deselect All")
         else:
             self.btPanel._bt_all.SetLabel("Select All")
         self.update_counter_text()
         
    def selectAll(self):
-      for i in range(self.reader.get_length()):
+      for i in range(self.reader.counts):
          self.mListBox.SetSelection(i)
          self.selectedItems.append(i)
       self.btPanel._bt_all.SetLabel("Deselect All")
-      self.counter=self.reader.get_length()
+      self.counter=self.reader.counts
       self.update_counter_text()
    
    def deselectAll(self):
@@ -181,7 +181,7 @@ class LbBtPanel(wx.Panel):
       self.counter_text.SetLabel((str)(self.counter)+"/0")
          
    def update_counter_text(self):
-      self._maxFiles=self.reader.get_length()
+      self._maxFiles=self.reader.counts
       self.counter_text.SetLabel((str)(self.counter)+"/"+(str)(self._maxFiles))
    
    @property
@@ -221,8 +221,8 @@ class TreeCtrlPanel(wx.Panel):
     def __init__(self,parent):
       wx.Panel.__init__(self,parent)
       self._wx_init()
-      self._init_pubsub()
       self._ApplyLayout()
+      self._init_pubsub()
       
     def _wx_init(self):
       self._TreePanel=jumeg_gui_config.CtrlPanel(self,fname="")
@@ -270,8 +270,8 @@ class MyFrame(wx.Frame):
    def __init__(self,parent,fname=None):
       wx.Frame.__init__(self,parent,id=wx.ID_ANY,title="JuMEG ListBox",pos=wx.DefaultPosition, size=wx.Size(500,400),style=wx.DEFAULT_FRAME_STYLE | wx.TAB_TRAVERSAL)
       self._wx_init(fname)
-      self._init_pubsub()
       self._ApplyLayout()
+      self._init_pubsub()
       
    def _wx_init(self,fname):
       if not fname:
