@@ -37,18 +37,26 @@ class FileList():
           if os.path.exists(fname):
               with open(fname,"r") as f:
                  self.read_lines(f)
-              files=self.get_basenames()
+              files=self.get_all_basenames()
       pub.sendMessage("listBoxListener",message="update",arg2=files)
+      print(files)
       return files
-  
+   
+   def get_all_basenames(self):
+      index=range(len(self._file_list))
+      self.get_basenames(index)
+
    def get_basenames(self,index=None):
-       
        if isinstance(index,list):
-         return [ os.path.basename( self._file_list[i] ) for i in index]
+          print("test1")
+          return [os.path.basename(self._file_list[i]) for i in index]
        elif isinstance(index,int):
-         return os.path.basename( self._file_list[index] )
+          print("test2")
+          return os.path.basename(self._file_list[index])
        else:
-         return None
+          print("test3")
+          print(type(self._file_list))
+          return self._file_list
       
    def get_files(self, index):
       if isinstance(index,list):

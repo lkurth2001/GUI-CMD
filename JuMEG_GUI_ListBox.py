@@ -51,7 +51,7 @@ class ButtonPanel(wx.Panel):
    def _init_pubsub(self):
       pass
       
-class LbBtPanel(wx.Panel):
+class FileSelectionBox(wx.Panel):
    def __init__(self,parent,fname):
       wx.Panel.__init__(self,parent,style=wx.BORDER_SUNKEN)
       self._wx_init(fname)
@@ -70,6 +70,7 @@ class LbBtPanel(wx.Panel):
       self.counter=0
       self.selectedItems=list()
       self.counter_text=wx.StaticText(self, wx.ID_ANY,(str)(self.counter)+"/0",wx.Point(-1,-1),wx.DefaultSize,0)
+      #print(type(choices))
       if len(choices)>0:
           self.mListBox = wx.ListBox(self,wx.ID_ANY,choices=choices,style=wx.LB_MULTIPLE) 
           self.mListBox.SetFont(wx.Font(12,75,90,90,False,wx.EmptyString))
@@ -280,13 +281,13 @@ class MyFrame(wx.Frame):
       
       self.Splitter=wx.SplitterWindow(self)
       
-      self._LbBtPanel=LbBtPanel(self.Splitter,fname)
+      self._FileSelectionBox=FileSelectionBox(self.Splitter,fname)
       
-      #self._LbBtPanel.Bind(wx.EVT_BUTTON,self.ClickOnButton)
+      #self._FileSelectionBox.Bind(wx.EVT_BUTTON,self.ClickOnButton)
       
       self._TreePanel=TreeCtrlPanel(self.Splitter)
       
-      self.Splitter.SplitVertically(self._LbBtPanel,self._TreePanel)
+      self.Splitter.SplitVertically(self._FileSelectionBox,self._TreePanel)
       self.Splitter.SetSashGravity(0.5)
       
       self.init_menu()
@@ -342,11 +343,11 @@ class MyFrame(wx.Frame):
     
    @property
    def mListBox(self):
-       return self._LbBtPanel.mListBox
+       return self._FileSelectionBox.mListBox
    
    @property
    def bt_all(self):
-       return self._LbBtPanel.btPanel._bt_all
+       return self._FileSelectionBox.btPanel._bt_all
     
    def menuhandler(self,event):
       id=event.GetId()
