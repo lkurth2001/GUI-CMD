@@ -7,7 +7,7 @@ Created on Tue Mar 10 11:57:02 2020
 
 import wx
 #import wx.xrc
-from file_reader import FileList
+from file_IO import FileList
 import os,logging,pprint
 from pubsub import pub
 import jumeg_base_config
