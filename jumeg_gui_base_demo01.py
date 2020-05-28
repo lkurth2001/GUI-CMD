@@ -314,20 +314,25 @@ class MainPanel(_BASE):
   
     def ClickOnButton(self,data=None):
         if data.upper().endswith("APPLY"):
-           logger.info("test1")
-           if self._FSB and self._ConfigCtrl._CFG._CfgTreeCtrl:
-              logger.info("test2")
-              if self._FSB.GetSelectedFiles() and self._ConfigCtrl._CFG._CfgTreeCtrl.GetData():
-                 logger.info("test3")
-                 files=self._FSB.GetSelectedFiles()
-                 self._FSB._FileReader.write_tmp_files(fdata=files,cdata=self._ConfigCtrl._CFG._CfgTreeCtrl.GetData())
-        
+           if self._FSB:
+              if self._ConfigCtrl._CFG._CfgTreeCtrl:
+                 if self._FSB.GetSelectedFiles():
+                    files=self._FSB.GetSelectedFiles()
+                    self._FSB._FileReader.write_tmp_files(fdata=files,cdata=self._ConfigCtrl._CFG._CfgTreeCtrl.GetData())
+                 else:
+                    self.ApplyException("You need to select a ListBox item")
+              else:
+                 self.ApplyException("You need to select a Config file")
+              
         if data.upper().endswith("DE/Select"):
            self._FSB.DeSelectFiles()    
            
         if data.upper().endswith("INFO"):
            logger.info(self._FSB.GetSelectedFiles())
-    
+           
+    def ApplyException(self,msg):
+       wx.MessageBox(msg, 'Attention', wx.OK)
+
       
         
 class MainWindow(wx.Frame):
